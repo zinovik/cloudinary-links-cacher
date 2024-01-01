@@ -6,6 +6,7 @@ import { ConfigParameterNotDefinedError } from './common/error/ConfigParameterNo
 
 const BUCKET_NAME = 'zinovik-gallery';
 const FILE_NAME = 'sources-config.json';
+const PREFIX_START = 'gallery/';
 
 functions.http('main', async (req, res) => {
     console.log('Triggered!');
@@ -30,7 +31,7 @@ functions.http('main', async (req, res) => {
     const main = new Main(
         new CloudinaryService(
             process.env.CLOUDINARY_CREDENTIALS,
-            prefixes.split(',')
+            prefixes.split(',').map((prefix) => `${PREFIX_START}${prefix}`)
         ),
         new GoogleStorageService(BUCKET_NAME, FILE_NAME)
     );
