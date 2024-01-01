@@ -30,7 +30,7 @@ functions.http('main', async (req, res) => {
     const main = new Main(
         new CloudinaryService(
             process.env.CLOUDINARY_CREDENTIALS,
-            (prefixes as string).split(',')
+            prefixes.split(',')
         ),
         new GoogleStorageService(BUCKET_NAME, FILE_NAME)
     );
