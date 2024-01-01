@@ -18,6 +18,13 @@ functions.http('main', async (req, res) => {
         query: { prefixes },
     } = req;
 
+    if (typeof prefixes !== 'string') {
+        res.status(422).json({
+            error: 'wrong prefixes',
+        });
+        return;
+    }
+
     console.log('Prefixes: ', prefixes);
 
     const main = new Main(
