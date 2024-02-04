@@ -11,7 +11,7 @@
         "test": "exit 0 && echo \"Tests are not implemented yet\"",
         "build": "rm -rf dist && tsc",
         "dev": "npm run build && GOOGLE_APPLICATION_CREDENTIALS=key-file.json env-cmd npx @google-cloud/functions-framework --target=main --source=dist",
-        "deploy": "npm run build && cp package*.json dist && gcloud functions deploy media-urls-updater --gen2 --trigger-http --runtime nodejs20 --entry-point=main --no-allow-unauthenticated --region=us-central1 --source=dist --update-build-env-vars=\"GOOGLE_NODE_RUN_SCRIPTS=\" --project zinovik-project --set-secrets=CLOUDINARY_CREDENTIALS=media-urls-updater-cloudinary-credentials:latest"
+        "deploy": "npm run build && cp package*.json dist && gcloud functions deploy media-urls-updater --gen2 --trigger-http --runtime nodejs18 --entry-point=main --no-allow-unauthenticated --region=us-central1 --source=dist --update-build-env-vars=\"GOOGLE_NODE_RUN_SCRIPTS=\" --project zinovik-project --set-secrets=CLOUDINARY_CREDENTIALS=media-urls-updater-cloudinary-credentials:latest"
     },
     "dependencies": {
         "@google-cloud/functions-framework": "3.3.0",
