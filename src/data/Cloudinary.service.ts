@@ -11,7 +11,11 @@ interface CloudinaryResource {
 export class CloudinaryService implements DataService {
     private Authorization: string;
 
-    constructor(credentials: string, private readonly prefixes: string[]) {
+    constructor(
+        credentials: string,
+        private readonly prefixes: string[],
+        private readonly prefixStart: string
+    ) {
         this.Authorization = `Basic ${Buffer.from(credentials).toString(
             'base64'
         )}`;
@@ -70,12 +74,15 @@ export class CloudinaryService implements DataService {
             .map((resource) => ({
                 url: resource.url.replace('http', 'https'),
                 type: resource.resource_type,
+                prefix: prefix.replace(this.prefixStart, ''),
             }));
     }
 
     async getSourcesConfig(): Promise<SourcesConfig> {
         const prefixSources = await Promise.all(
-            this.prefixes.map((prefix) => this.getPrefixSources(prefix))
+            this.prefixes.map((prefix) =>
+                this.getPrefixSources(`${this.prefixStart}${prefix}`)
+            )
         );
 
         this.prefixes.forEach((prefix, index) =>

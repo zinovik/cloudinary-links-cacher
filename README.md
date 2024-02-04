@@ -11,12 +11,6 @@ gcloud storage buckets describe gs://zinovik-gallery --format="default(cors_conf
 gcloud storage buckets update gs://zinovik-gallery --versioning
 ```
 
-### create scheduler
-
-```bash
-gcloud scheduler jobs create http media-urls-updater --location=us-central1 --schedule="0 0 1 1 *" --uri="https://us-central1-zinovik-project.cloudfunctions.net/media-urls-updater?prefixes=zanzibar,naliboki,sakartvelo,zalessie,sri-lanka,uzbekistan,berlin,netherlands,greece,gigs,board-games" --oidc-service-account-email=zinovik-project@appspot.gserviceaccount.com --http-method=get --oidc-token-audience="https://us-central1-zinovik-project.cloudfunctions.net/media-urls-updater"
-```
-
 ### create service account
 
 ```bash

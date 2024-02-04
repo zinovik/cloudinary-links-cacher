@@ -5,35 +5,33 @@ import { GoogleStorageService } from './storage/GoogleStorage.service';
 import { ConfigParameterNotDefinedError } from './common/error/ConfigParameterNotDefinedError';
 
 const BUCKET_NAME = 'zinovik-gallery';
-const FILE_NAME = 'sources-config.json';
+const SOURCE_CONFIG_FILE_NAME = 'sources-config.json';
+const ALBUMS_FILE_NAME = 'albums.json';
+const FILES_FILE_NAME = 'files.json';
 const PREFIX_START = 'gallery/';
 
-functions.http('main', async (req, res) => {
+functions.http('main', async (_req, res) => {
     console.log('Triggered!');
 
     if (process.env.CLOUDINARY_CREDENTIALS === undefined) {
         throw new ConfigParameterNotDefinedError('CLOUDINARY_CREDENTIALS');
     }
 
-    const {
-        query: { prefixes },
-    } = req;
-
-    if (typeof prefixes !== 'string') {
-        res.status(422).json({
-            error: 'wrong prefixes',
-        });
-        return;
-    }
-
-    console.log('Prefixes: ', prefixes);
+    const prefixes =
+        'zanzibar,naliboki,sakartvelo,zalessie,sri-lanka,uzbekistan,berlin,netherlands,greece,gigs,board-games'; // TODO: Read from storage
 
     const main = new Main(
         new CloudinaryService(
             process.env.CLOUDINARY_CREDENTIALS,
-            prefixes.split(',').map((prefix) => `${PREFIX_START}${prefix}`)
+            prefixes.split(','),
+            PREFIX_START
         ),
-        new GoogleStorageService(BUCKET_NAME, FILE_NAME)
+        new GoogleStorageService(
+            BUCKET_NAME,
+            SOURCE_CONFIG_FILE_NAME,
+            FILES_FILE_NAME,
+            ALBUMS_FILE_NAME
+        )
     );
 
     await main.process();

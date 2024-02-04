@@ -11,12 +11,16 @@ export class Main {
     }
 
     async process(): Promise<void> {
-        console.time('Getting data from the data service');
+        console.time('Getting source config from the data service');
         const sourcesConfig = await this.dataService.getSourcesConfig();
-        console.timeLog('Getting data from the data service');
+        console.timeLog('Getting source config from the data service');
 
-        console.time('Writing data to the storage service');
-        await this.storageService.saveSourcesConfig(sourcesConfig);
-        console.timeLog('Writing data to the storage service');
+        console.time('Writing source config to the storage service');
+        // await this.storageService.saveSourcesConfig(sourcesConfig);
+        console.timeLog('Writing source config to the storage service');
+
+        console.time('Updating gallery');
+        await this.storageService.updateGallery(sourcesConfig);
+        console.timeLog('Updating gallery');
     }
 }
