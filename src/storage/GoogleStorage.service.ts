@@ -50,9 +50,8 @@ export class GoogleStorageService implements StorageService {
         const filesFile: File = this.bucket.file(this.filesFileName);
         const albumsFile: File = this.bucket.file(this.albumsFileName);
 
-        // TODO: Read in Promise.all
-        const filesDownloadResponse = await filesFile.download();
-        const albumsDownloadResponse = await albumsFile.download();
+        const [filesDownloadResponse, albumsDownloadResponse] =
+            await Promise.all([filesFile.download(), albumsFile.download()]);
 
         const files: FileInterface[] = JSON.parse(
             filesDownloadResponse.toString()
@@ -66,7 +65,7 @@ export class GoogleStorageService implements StorageService {
             (filename) => !files.some((file) => file.filename === filename)
         );
 
-        console.log('NEW FILENAMES', newFilenames.join(', '));
+        console.log('NEW FILENAMES:', newFilenames.join(', '));
 
         if (newFilenames.length > 0) {
             files.push(
@@ -86,7 +85,7 @@ export class GoogleStorageService implements StorageService {
             .filter((file) => !albums.some((album) => album.path === file.path))
             .map((file) => file.path);
 
-        console.log('NEW PATHS', newPaths.join(', '));
+        console.log('NEW PATHS:', newPaths.join(', '));
 
         if (newPaths.length > 0) {
             albums.push(
@@ -102,36 +101,42 @@ export class GoogleStorageService implements StorageService {
             albums = this.sortAlbums(albums);
         }
 
-        // TODO: Save in Promise.all
-        if (newFilenames.length > 0) {
-            const filesDataBuffer = Buffer.from(
-                JSON.stringify(this.sortFiles(files, albums))
-            );
+        await Promise.all([
+            newFilenames.length > 0
+                ? async () => {
+                      const filesDataBuffer = Buffer.from(
+                          JSON.stringify(this.sortFiles(files, albums))
+                      );
 
-            await filesFile.save(filesDataBuffer, {
-                gzip: true,
-                public: true,
-                resumable: true,
-                contentType: 'application/json',
-                metadata: {
-                    cacheControl: 'no-cache',
-                },
-            });
-        }
+                      await filesFile.save(filesDataBuffer, {
+                          gzip: true,
+                          public: true,
+                          resumable: true,
+                          contentType: 'application/json',
+                          metadata: {
+                              cacheControl: 'no-cache',
+                          },
+                      });
+                  }
+                : Promise.resolve(),
+            newPaths.length > 0
+                ? async () => {
+                      const albumsDataBuffer = Buffer.from(
+                          JSON.stringify(files)
+                      );
 
-        if (newPaths.length > 0) {
-            const albumsDataBuffer = Buffer.from(JSON.stringify(files));
-
-            await albumsFile.save(albumsDataBuffer, {
-                gzip: true,
-                public: true,
-                resumable: true,
-                contentType: 'application/json',
-                metadata: {
-                    cacheControl: 'no-cache',
-                },
-            });
-        }
+                      await albumsFile.save(albumsDataBuffer, {
+                          gzip: true,
+                          public: true,
+                          resumable: true,
+                          contentType: 'application/json',
+                          metadata: {
+                              cacheControl: 'no-cache',
+                          },
+                      });
+                  }
+                : Promise.resolve(),
+        ]);
     }
 
     private sortAlbums(albums: AlbumInterface[]): AlbumInterface[] {
