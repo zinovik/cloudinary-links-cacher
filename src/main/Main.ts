@@ -16,7 +16,7 @@ export class Main {
         console.timeLog('Getting source config from the data service');
 
         console.time('Writing source config to the storage service');
-        // await this.storageService.saveSourcesConfig(sourcesConfig);
+        await this.storageService.saveSourcesConfig(sourcesConfig);
         console.timeLog('Writing source config to the storage service');
 
         console.time('Updating gallery');
