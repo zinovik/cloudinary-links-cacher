@@ -17,15 +17,8 @@ functions.http('main', async (_req, res) => {
         throw new ConfigParameterNotDefinedError('CLOUDINARY_CREDENTIALS');
     }
 
-    const prefixes =
-        'zanzibar,naliboki,sakartvelo,zalessie,sri-lanka,uzbekistan,berlin,netherlands,greece,gigs,board-games'; // TODO: Read from storage
-
     const main = new Main(
-        new CloudinaryService(
-            process.env.CLOUDINARY_CREDENTIALS,
-            prefixes.split(','),
-            PREFIX_START
-        ),
+        new CloudinaryService(process.env.CLOUDINARY_CREDENTIALS, PREFIX_START),
         new GoogleStorageService(
             BUCKET_NAME,
             SOURCE_CONFIG_FILE_NAME,

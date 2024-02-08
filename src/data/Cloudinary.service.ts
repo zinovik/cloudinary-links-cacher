@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { DataService } from './DataService.interface';
-import { Source, SourcesConfig } from '../common/types/SourcesConfig';
+import { MediaMetadata } from '../common/types/MediaMetadata';
 import { MediaType } from '../common/types/MediaType';
 
 interface CloudinaryResource {
@@ -11,11 +11,7 @@ interface CloudinaryResource {
 export class CloudinaryService implements DataService {
     private Authorization: string;
 
-    constructor(
-        credentials: string,
-        private readonly prefixes: string[],
-        private readonly prefixStart: string
-    ) {
+    constructor(credentials: string, private readonly prefixStart: string) {
         this.Authorization = `Basic ${Buffer.from(credentials).toString(
             'base64'
         )}`;
@@ -59,7 +55,9 @@ export class CloudinaryService implements DataService {
         return resources;
     }
 
-    private async getPrefixSources(prefix: string): Promise<Source[]> {
+    private async getPrefixSources(
+        prefix: string
+    ): Promise<MediaMetadata[string][]> {
         const [imageResources, videoResources] = await Promise.all([
             this.getCloudinaryResources(prefix, 'image'),
             this.getCloudinaryResources(prefix, 'video'),
@@ -73,19 +71,18 @@ export class CloudinaryService implements DataService {
             )
             .map((resource) => ({
                 url: resource.url.replace('http', 'https'),
-                type: resource.resource_type,
                 prefix: prefix.replace(this.prefixStart, ''),
             }));
     }
 
-    async getSourcesConfig(): Promise<SourcesConfig> {
+    async getMediaMetadata(prefixes: string[]): Promise<MediaMetadata> {
         const prefixSources = await Promise.all(
-            this.prefixes.map((prefix) =>
+            prefixes.map((prefix) =>
                 this.getPrefixSources(`${this.prefixStart}${prefix}`)
             )
         );
 
-        this.prefixes.forEach((prefix, index) =>
+        prefixes.forEach((prefix, index) =>
             console.log(`${prefix}: ${prefixSources[index].length}`)
         );
 
@@ -94,11 +91,11 @@ export class CloudinaryService implements DataService {
             []
         );
 
-        const sourcesConfig: SourcesConfig = {};
+        const mediaMetadata: MediaMetadata = {};
         allPrefixSources.forEach((urlConfig) => {
-            sourcesConfig[this.getFilename(urlConfig.url)] = urlConfig;
+            mediaMetadata[this.getFilename(urlConfig.url)] = urlConfig;
         });
 
-        return sourcesConfig;
+        return mediaMetadata;
     }
 }

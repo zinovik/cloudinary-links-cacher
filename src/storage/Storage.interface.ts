@@ -1,6 +1,6 @@
-import { SourcesConfig } from '../common/types/SourcesConfig';
+import { MediaMetadata } from '../common/types/MediaMetadata';
 
 export interface StorageService {
-    saveSourcesConfig(data: SourcesConfig): Promise<void>;
-    updateGallery(data: SourcesConfig): Promise<void>;
+    saveSourcesConfig(data: MediaMetadata): Promise<void>;
+    updateGallery(data: MediaMetadata): Promise<void>;
 }

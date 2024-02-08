@@ -1,6 +1,6 @@
 import { Bucket, Storage, File } from '@google-cloud/storage';
 import { StorageService } from './Storage.interface';
-import { SourcesConfig } from '../common/types/SourcesConfig';
+import { MediaMetadata } from '../common/types/MediaMetadata';
 
 interface AlbumInterface {
     path: string;
@@ -14,7 +14,7 @@ interface FileInterface {
     filename: string;
     isTitle?: true;
     isNoThumbnail?: true;
-    description?: string;
+    description: string;
     text?: string | string[];
     isVertical?: true;
 }
@@ -32,9 +32,21 @@ export class GoogleStorageService implements StorageService {
         this.bucket = storage.bucket(this.bucketName);
     }
 
-    async saveSourcesConfig(data: SourcesConfig): Promise<void> {
+    async saveSourcesConfig(data: MediaMetadata): Promise<void> {
         const file: File = this.bucket.file(this.sourceConfigFileName);
-        const dataBuffer = Buffer.from(JSON.stringify(data));
+
+        const dataPrefixRemoved: Record<string, string> = Object.keys(
+            data
+        ).reduce(
+            (acc, filename) => ({
+                ...acc,
+                [filename]: data[filename].url,
+            }),
+            {}
+        );
+
+        const dataBuffer = Buffer.from(JSON.stringify(dataPrefixRemoved));
+
         await file.save(dataBuffer, {
             gzip: true,
             public: true,
@@ -46,7 +58,7 @@ export class GoogleStorageService implements StorageService {
         });
     }
 
-    async updateGallery(data: SourcesConfig): Promise<void> {
+    async updateGallery(data: MediaMetadata): Promise<void> {
         const filesFile: File = this.bucket.file(this.filesFileName);
         const albumsFile: File = this.bucket.file(this.albumsFileName);
 
