@@ -120,36 +120,42 @@ export class GoogleStorageService implements StorageService {
             albums = this.sortAlbums(albums);
         }
 
-        // TODO: Save in Promise.all
-        if (newFilenames.length > 0) {
-            const filesDataBuffer = Buffer.from(
-                JSON.stringify(this.sortFiles(files, albums))
-            );
+        await Promise.all([
+            newFilenames.length > 0
+                ? (() => {
+                      const filesDataBuffer = Buffer.from(
+                          JSON.stringify(this.sortFiles(files, albums))
+                      );
 
-            await filesFile.save(filesDataBuffer, {
-                gzip: true,
-                public: true,
-                resumable: true,
-                contentType: 'application/json',
-                metadata: {
-                    cacheControl: 'no-cache',
-                },
-            });
-        }
+                      return filesFile.save(filesDataBuffer, {
+                          gzip: true,
+                          public: true,
+                          resumable: true,
+                          contentType: 'application/json',
+                          metadata: {
+                              cacheControl: 'no-cache',
+                          },
+                      });
+                  })()
+                : Promise.resolve(),
+            newPaths.length > 0
+                ? (() => {
+                      const albumsDataBuffer = Buffer.from(
+                          JSON.stringify(albums)
+                      );
 
-        if (newPaths.length > 0) {
-            const albumsDataBuffer = Buffer.from(JSON.stringify(albums));
-
-            await albumsFile.save(albumsDataBuffer, {
-                gzip: true,
-                public: true,
-                resumable: true,
-                contentType: 'application/json',
-                metadata: {
-                    cacheControl: 'no-cache',
-                },
-            });
-        }
+                      return albumsFile.save(albumsDataBuffer, {
+                          gzip: true,
+                          public: true,
+                          resumable: true,
+                          contentType: 'application/json',
+                          metadata: {
+                              cacheControl: 'no-cache',
+                          },
+                      });
+                  })()
+                : Promise.resolve(),
+        ]);
     }
 
     private sortAlbums(albums: AlbumInterface[]): AlbumInterface[] {
