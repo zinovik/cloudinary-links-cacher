@@ -11,16 +11,18 @@ export class Main {
     }
 
     async process(): Promise<void> {
-        console.time('Getting source config from the data service');
+        const id = Date.now();
+
+        console.time('Getting source config from the data service ' + id);
         const mediaMetadata = await this.dataService.getMediaMetadata();
-        console.timeLog('Getting source config from the data service');
+        console.timeLog('Getting source config from the data service ' + id);
 
-        console.time('Writing source config to the storage service');
+        console.time('Writing source config to the storage service ' + id);
         await this.storageService.saveSourcesConfig(mediaMetadata);
-        console.timeLog('Writing source config to the storage service');
+        console.timeLog('Writing source config to the storage service ' + id);
 
-        console.time('Updating gallery');
+        console.time('Updating gallery ' + id);
         await this.storageService.updateGallery(mediaMetadata);
-        console.timeLog('Updating gallery');
+        console.timeLog('Updating gallery ' + id);
     }
 }

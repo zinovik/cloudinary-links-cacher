@@ -163,18 +163,29 @@ export class GoogleStorageService implements StorageService {
             .filter((album) => album.isSorted)
             .map((album) => album.path);
 
+        const topLevelAlbums = albums
+            .filter((album) => album.path.split('/').length === 1)
+            .map((album) => album.path);
+
         return [...albums].sort((a1, a2) => {
-            if (a1.path.split('/')[0] !== a2.path.split('/')[0]) {
+            const a1PathParts = a1.path.split('/');
+            const a2PathParts = a2.path.split('/');
+
+            if (a1PathParts.length === 1 && a2PathParts.length === 1) {
                 return 0;
+            }
+
+            if (a1PathParts[0] !== a2PathParts[0]) {
+                return (
+                    topLevelAlbums.indexOf(a1PathParts[0]) -
+                    topLevelAlbums.indexOf(a2PathParts[0])
+                );
             }
 
             // the same root path
 
             // is sorted album
-            if (sortedAlbums.includes(a1.path.split('/')[0])) {
-                const a1PathParts = a1.path.split('/');
-                const a2PathParts = a2.path.split('/');
-
+            if (sortedAlbums.includes(a1PathParts[0])) {
                 if (a1PathParts.length === a2PathParts.length)
                     return a1.path.localeCompare(a2.path);
 
@@ -186,8 +197,8 @@ export class GoogleStorageService implements StorageService {
                 for (let i = 0; i < minPathParts; i++) {
                     if (a1PathParts[i] !== a2PathParts[i]) {
                         if (a1PathParts[i] === undefined) return -1;
-                        if (a2PathParts[i] === undefined) return -1;
-                        return a2PathParts[i].localeCompare(a2PathParts[i]);
+                        if (a2PathParts[i] === undefined) return 1;
+                        return a1PathParts[i].localeCompare(a2PathParts[i]);
                     }
                 }
             }
