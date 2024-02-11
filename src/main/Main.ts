@@ -11,28 +11,8 @@ export class Main {
     }
 
     async process(): Promise<void> {
-        // TODO Get from storage
-        const PREFIXES = [
-            'vietnam',
-            'hoverla',
-            'eurotrip',
-            'zanzibar',
-            'naliboki',
-            'belovezhskaya-pushcha',
-            'sakartvelo',
-            'zalessie',
-            'sri-lanka',
-            'uzbekistan',
-            'ski-resorts',
-            'berlin',
-            'netherlands',
-            'greece',
-            'gigs',
-            'board-games',
-        ];
-
         console.time('Getting source config from the data service');
-        const mediaMetadata = await this.dataService.getMediaMetadata(PREFIXES);
+        const mediaMetadata = await this.dataService.getMediaMetadata();
         console.timeLog('Getting source config from the data service');
 
         console.time('Writing source config to the storage service');

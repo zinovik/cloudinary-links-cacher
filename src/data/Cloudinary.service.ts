@@ -11,7 +11,11 @@ interface CloudinaryResource {
 export class CloudinaryService implements DataService {
     private Authorization: string;
 
-    constructor(credentials: string, private readonly prefixStart: string) {
+    constructor(
+        credentials: string,
+        private readonly cloudinaryName: string,
+        private readonly cloudinaryFolder: string
+    ) {
         this.Authorization = `Basic ${Buffer.from(credentials).toString(
             'base64'
         )}`;
@@ -22,7 +26,9 @@ export class CloudinaryService implements DataService {
         type: MediaType,
         nextCursor: string
     ): string {
-        return `https://api.cloudinary.com/v1_1/zinovik/resources/${type}?prefix=${prefix}&type=upload&max_results=500${
+        return `https://api.cloudinary.com/v1_1/${
+            this.cloudinaryName
+        }/resources/${type}?prefix=${prefix}&type=upload&max_results=500${
             nextCursor ? `&next_cursor=${nextCursor}` : ''
         }`;
     }
@@ -71,28 +77,42 @@ export class CloudinaryService implements DataService {
             )
             .map((resource) => ({
                 url: resource.url.replace('http', 'https'),
-                prefix: prefix.replace(this.prefixStart, ''),
+                prefix: prefix.replace(`${this.cloudinaryFolder}/`, ''),
             }));
     }
 
-    async getMediaMetadata(prefixes: string[]): Promise<MediaMetadata> {
-        const prefixSources = await Promise.all(
-            prefixes.map((prefix) =>
-                this.getPrefixSources(`${this.prefixStart}${prefix}`)
-            )
+    private async getPaths(): Promise<string[]> {
+        const {
+            data: { folders },
+        }: { data: { folders: Array<{ name: string; path: string }> } } =
+            await axios.get(
+                `https://api.cloudinary.com/v1_1/${this.cloudinaryName}/folders/${this.cloudinaryFolder}`,
+                {
+                    headers: { Authorization: this.Authorization },
+                }
+            );
+
+        return folders.map((folder) => folder.path);
+    }
+
+    async getMediaMetadata(): Promise<MediaMetadata> {
+        const paths = await this.getPaths();
+
+        const pathSources = await Promise.all(
+            paths.map((path) => this.getPrefixSources(path))
         );
 
-        prefixes.forEach((prefix, index) =>
-            console.log(`${prefix}: ${prefixSources[index].length}`)
+        paths.forEach((path, index) =>
+            console.log(`${path}: ${pathSources[index].length}`)
         );
 
-        const allPrefixSources = prefixSources.reduce(
-            (acc, prefixUrls) => [...acc, ...prefixUrls],
+        const allPathsSources = pathSources.reduce(
+            (acc, pathUrls) => [...acc, ...pathUrls],
             []
         );
 
         const mediaMetadata: MediaMetadata = {};
-        allPrefixSources.forEach((urlConfig) => {
+        allPathsSources.forEach((urlConfig) => {
             mediaMetadata[this.getFilename(urlConfig.url)] = urlConfig;
         });
 

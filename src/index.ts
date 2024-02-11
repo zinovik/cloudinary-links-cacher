@@ -8,7 +8,8 @@ const BUCKET_NAME = 'zinovik-gallery';
 const SOURCE_CONFIG_FILE_NAME = 'sources-config.json';
 const ALBUMS_FILE_NAME = 'albums.json';
 const FILES_FILE_NAME = 'files.json';
-const PREFIX_START = 'gallery/';
+const CLOUDINARY_NAME = 'zinovik';
+const CLOUDINARY_FOLDER = 'gallery';
 
 functions.http('main', async (_req, res) => {
     console.log('Triggered!');
@@ -18,7 +19,11 @@ functions.http('main', async (_req, res) => {
     }
 
     const main = new Main(
-        new CloudinaryService(process.env.CLOUDINARY_CREDENTIALS, PREFIX_START),
+        new CloudinaryService(
+            process.env.CLOUDINARY_CREDENTIALS,
+            CLOUDINARY_NAME,
+            CLOUDINARY_FOLDER
+        ),
         new GoogleStorageService(
             BUCKET_NAME,
             SOURCE_CONFIG_FILE_NAME,

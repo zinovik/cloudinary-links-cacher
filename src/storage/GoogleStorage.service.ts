@@ -93,9 +93,16 @@ export class GoogleStorageService implements StorageService {
             );
         }
 
-        const newPaths = files
-            .filter((file) => !albums.some((album) => album.path === file.path))
-            .map((file) => file.path);
+        const newPaths = [
+            ...new Set(
+                files
+                    .filter(
+                        (file) =>
+                            !albums.some((album) => album.path === file.path)
+                    )
+                    .map((file) => file.path)
+            ),
+        ];
 
         console.log('NEW PATHS:', newPaths.join(', '));
 
@@ -131,7 +138,7 @@ export class GoogleStorageService implements StorageService {
         }
 
         if (newPaths.length > 0) {
-            const albumsDataBuffer = Buffer.from(JSON.stringify(files));
+            const albumsDataBuffer = Buffer.from(JSON.stringify(albums));
 
             await albumsFile.save(albumsDataBuffer, {
                 gzip: true,
