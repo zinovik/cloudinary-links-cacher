@@ -1,6 +1,6 @@
 import { Bucket, Storage, File } from '@google-cloud/storage';
 import { StorageService } from './Storage.interface';
-import { MediaMetadata } from '../common/types/MediaMetadata';
+import { Source } from '../common/types/Source';
 
 interface AlbumInterface {
     path: string;
@@ -32,20 +32,15 @@ export class GoogleStorageService implements StorageService {
         this.bucket = storage.bucket(this.bucketName);
     }
 
-    async saveSourcesConfig(data: MediaMetadata): Promise<void> {
+    async saveSourcesConfig(sources: Source[]): Promise<void> {
         const file: File = this.bucket.file(this.sourceConfigFileName);
 
-        const dataPrefixRemoved: Record<string, string> = Object.keys(
-            data
-        ).reduce(
-            (acc, filename) => ({
-                ...acc,
-                [filename]: data[filename].url,
-            }),
-            {}
-        );
+        const sourceConfig: Record<string, string> = {};
+        sources.forEach((source) => {
+            sourceConfig[source.filename] = source.url;
+        });
 
-        const dataBuffer = Buffer.from(JSON.stringify(dataPrefixRemoved));
+        const dataBuffer = Buffer.from(JSON.stringify(sourceConfig));
 
         await file.save(dataBuffer, {
             gzip: true,
@@ -58,7 +53,7 @@ export class GoogleStorageService implements StorageService {
         });
     }
 
-    async updateGallery(data: MediaMetadata): Promise<void> {
+    async updateGallery(sources: Source[]): Promise<void> {
         const filesFile: File = this.bucket.file(this.filesFileName);
         const albumsFile: File = this.bucket.file(this.albumsFileName);
 
@@ -73,23 +68,22 @@ export class GoogleStorageService implements StorageService {
             albumsDownloadResponse.toString()
         );
 
-        const newFilenames = Object.keys(data).filter(
-            (filename) => !files.some((file) => file.filename === filename)
+        const newSources = sources.filter(
+            (source) => !files.some((file) => file.filename === source.filename)
         );
 
-        console.log('NEW FILENAMES:', newFilenames.join(', '));
+        console.log(
+            'NEW FILENAMES:',
+            newSources.map((source) => source.filename).join(', ')
+        );
 
-        if (newFilenames.length > 0) {
+        if (newSources.length > 0) {
             files.push(
-                ...newFilenames.map((filename) => {
-                    const source = data[filename];
-
-                    return {
-                        path: `${source.prefix}/unsorted`,
-                        filename,
-                        description: '',
-                    };
-                })
+                ...newSources.map((source) => ({
+                    path: `${source.folder}/unsorted`,
+                    filename: source.filename,
+                    description: '',
+                }))
             );
         }
 
@@ -121,7 +115,7 @@ export class GoogleStorageService implements StorageService {
         }
 
         await Promise.all([
-            newFilenames.length > 0
+            newSources.length > 0
                 ? (() => {
                       const filesDataBuffer = Buffer.from(
                           JSON.stringify(this.sortFiles(files, albums))

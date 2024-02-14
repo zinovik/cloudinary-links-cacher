@@ -1,5 +1,5 @@
-import { MediaMetadata } from '../common/types/MediaMetadata';
+import { Source } from '../common/types/Source';
 
 export interface DataService {
-    getMediaMetadata(): Promise<MediaMetadata>;
+    getSources(): Promise<Source[]>;
 }

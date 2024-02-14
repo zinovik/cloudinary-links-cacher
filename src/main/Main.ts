@@ -14,15 +14,15 @@ export class Main {
         const id = Date.now();
 
         console.time('Getting source config from the data service ' + id);
-        const mediaMetadata = await this.dataService.getMediaMetadata();
+        const sources = await this.dataService.getSources();
         console.timeLog('Getting source config from the data service ' + id);
 
         console.time('Writing source config to the storage service ' + id);
-        await this.storageService.saveSourcesConfig(mediaMetadata);
+        await this.storageService.saveSourcesConfig(sources);
         console.timeLog('Writing source config to the storage service ' + id);
 
         console.time('Updating gallery ' + id);
-        await this.storageService.updateGallery(mediaMetadata);
+        await this.storageService.updateGallery(sources);
         console.timeLog('Updating gallery ' + id);
     }
 }

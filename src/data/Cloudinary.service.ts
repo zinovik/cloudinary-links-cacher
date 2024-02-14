@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { DataService } from './DataService.interface';
-import { MediaMetadata } from '../common/types/MediaMetadata';
+import { Source } from '../common/types/Source';
 import { MediaType } from '../common/types/MediaType';
 
 interface CloudinaryResource {
     url: string;
     resource_type: MediaType;
+    folder: string;
 }
 
 export class CloudinaryService implements DataService {
@@ -22,13 +23,13 @@ export class CloudinaryService implements DataService {
     }
 
     private getCloudinaryUrl(
-        prefix: string,
+        folder: string,
         type: MediaType,
         nextCursor: string
     ): string {
         return `https://api.cloudinary.com/v1_1/${
             this.cloudinaryName
-        }/resources/${type}?prefix=${prefix}&type=upload&max_results=500${
+        }/resources/${type}?prefix=${folder}&type=upload&max_results=500${
             nextCursor ? `&next_cursor=${nextCursor}` : ''
         }`;
     }
@@ -38,7 +39,7 @@ export class CloudinaryService implements DataService {
     }
 
     private async getCloudinaryResources(
-        prefix: string,
+        folder: string,
         type: MediaType
     ): Promise<CloudinaryResource[]> {
         const resources: CloudinaryResource[] = [];
@@ -50,7 +51,7 @@ export class CloudinaryService implements DataService {
             }: {
                 data: { resources: CloudinaryResource[]; next_cursor: string };
             } = await axios.get(
-                this.getCloudinaryUrl(prefix, type, nextCursor),
+                this.getCloudinaryUrl(folder, type, nextCursor),
                 { headers: { Authorization: this.Authorization } }
             );
 
@@ -61,61 +62,20 @@ export class CloudinaryService implements DataService {
         return resources;
     }
 
-    private async getPrefixSources(
-        prefix: string
-    ): Promise<MediaMetadata[string][]> {
+    async getSources(): Promise<Source[]> {
         const [imageResources, videoResources] = await Promise.all([
-            this.getCloudinaryResources(prefix, 'image'),
-            this.getCloudinaryResources(prefix, 'video'),
+            this.getCloudinaryResources(this.cloudinaryFolder, 'image'),
+            this.getCloudinaryResources(this.cloudinaryFolder, 'video'),
         ]);
 
         return [...imageResources, ...videoResources]
-            .sort((resource1, resource2) =>
-                this.getFilename(resource1.url).localeCompare(
-                    this.getFilename(resource2.url)
-                )
-            )
             .map((resource) => ({
                 url: resource.url.replace('http', 'https'),
-                prefix: prefix.replace(`${this.cloudinaryFolder}/`, ''),
-            }));
-    }
-
-    private async getPaths(): Promise<string[]> {
-        const {
-            data: { folders },
-        }: { data: { folders: Array<{ name: string; path: string }> } } =
-            await axios.get(
-                `https://api.cloudinary.com/v1_1/${this.cloudinaryName}/folders/${this.cloudinaryFolder}`,
-                {
-                    headers: { Authorization: this.Authorization },
-                }
+                filename: this.getFilename(resource.url),
+                folder: resource.folder,
+            }))
+            .sort((source1, source2) =>
+                source1.filename.localeCompare(source2.filename)
             );
-
-        return folders.map((folder) => folder.path);
-    }
-
-    async getMediaMetadata(): Promise<MediaMetadata> {
-        const paths = await this.getPaths();
-
-        const pathSources = await Promise.all(
-            paths.map((path) => this.getPrefixSources(path))
-        );
-
-        paths.forEach((path, index) =>
-            console.log(`${path}: ${pathSources[index].length}`)
-        );
-
-        const allPathsSources = pathSources.reduce(
-            (acc, pathUrls) => [...acc, ...pathUrls],
-            []
-        );
-
-        const mediaMetadata: MediaMetadata = {};
-        allPathsSources.forEach((urlConfig) => {
-            mediaMetadata[this.getFilename(urlConfig.url)] = urlConfig;
-        });
-
-        return mediaMetadata;
     }
 }
