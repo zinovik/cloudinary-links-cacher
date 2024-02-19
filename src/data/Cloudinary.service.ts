@@ -72,7 +72,10 @@ export class CloudinaryService implements DataService {
             .map((resource) => ({
                 url: resource.url.replace('http', 'https'),
                 filename: this.getFilename(resource.url),
-                folder: resource.folder,
+                folder: resource.folder.replace(
+                    `${this.cloudinaryFolder}/`,
+                    ''
+                ),
             }))
             .sort((source1, source2) =>
                 source1.filename.localeCompare(source2.filename)
