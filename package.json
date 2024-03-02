@@ -4,19 +4,20 @@
     "description": "media urls updater",
     "main": "index.js",
     "engines": {
-        "node": ">=18.0",
+        "node": ">=20.0",
         "npm": ">=8.0"
     },
     "scripts": {
         "test": "exit 0 && echo \"Tests are not implemented yet\"",
         "build": "rm -rf dist && tsc",
         "dev": "npm run build && GOOGLE_APPLICATION_CREDENTIALS=key-file.json env-cmd npx @google-cloud/functions-framework --target=main --source=dist",
-        "deploy": "npm run build && cp package*.json dist && gcloud functions deploy media-urls-updater --gen2 --trigger-http --runtime nodejs18 --entry-point=main --no-allow-unauthenticated --region=us-central1 --source=dist --update-build-env-vars=\"GOOGLE_NODE_RUN_SCRIPTS=\" --project zinovik-project --set-secrets=CLOUDINARY_CREDENTIALS=media-urls-updater-cloudinary-credentials:latest"
+        "deploy": "npm run build && cp package*.json dist && gcloud functions deploy media-urls-updater --gen2 --trigger-http --runtime nodejs20 --entry-point=main --no-allow-unauthenticated --region=us-central1 --source=dist --update-build-env-vars=\"GOOGLE_NODE_RUN_SCRIPTS=\" --project zinovik-project --set-secrets=CLOUDINARY_CREDENTIALS=media-urls-updater-cloudinary-credentials:latest"
     },
     "dependencies": {
         "@google-cloud/functions-framework": "3.3.0",
         "@google-cloud/storage": "7.7.0",
-        "axios": "1.6.7"
+        "axios": "1.6.7",
+        "stream-shift": "1.0.3"
     },
     "devDependencies": {
         "@types/jest": "29.5.12",
