@@ -1,7 +1,7 @@
 import { DataService } from '../data/DataService.interface';
 import { StorageService } from '../storage/Storage.interface';
 
-const STORAGE_FOLDERS = ['zanzibar', 'svaneti', 'gigs'];
+const STORAGE_FOLDERS = ['zanzibar', 'gigs'];
 
 export class Main {
     constructor(

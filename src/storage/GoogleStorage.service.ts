@@ -129,44 +129,39 @@ export class GoogleStorageService implements StorageService {
                     };
                 })
             );
-            albums = this.sortAlbums(albums);
         }
 
         await Promise.all([
-            newSources.length > 0
-                ? (() => {
-                      const filesDataBuffer = Buffer.from(
-                          JSON.stringify(this.sortFiles(files, albums))
-                      );
+            (() => {
+                const filesDataBuffer = Buffer.from(
+                    JSON.stringify(this.sortFiles(files, albums))
+                );
 
-                      return filesFile.save(filesDataBuffer, {
-                          gzip: true,
-                          public: true,
-                          resumable: true,
-                          contentType: 'application/json',
-                          metadata: {
-                              cacheControl: 'no-cache',
-                          },
-                      });
-                  })()
-                : Promise.resolve(),
-            newPaths.length > 0
-                ? (() => {
-                      const albumsDataBuffer = Buffer.from(
-                          JSON.stringify(albums)
-                      );
+                return filesFile.save(filesDataBuffer, {
+                    gzip: true,
+                    public: true,
+                    resumable: true,
+                    contentType: 'application/json',
+                    metadata: {
+                        cacheControl: 'no-cache',
+                    },
+                });
+            })(),
+            (() => {
+                const albumsDataBuffer = Buffer.from(
+                    JSON.stringify(this.sortAlbums(albums))
+                );
 
-                      return albumsFile.save(albumsDataBuffer, {
-                          gzip: true,
-                          public: true,
-                          resumable: true,
-                          contentType: 'application/json',
-                          metadata: {
-                              cacheControl: 'no-cache',
-                          },
-                      });
-                  })()
-                : Promise.resolve(),
+                return albumsFile.save(albumsDataBuffer, {
+                    gzip: true,
+                    public: true,
+                    resumable: true,
+                    contentType: 'application/json',
+                    metadata: {
+                        cacheControl: 'no-cache',
+                    },
+                });
+            })(),
         ]);
     }
 
