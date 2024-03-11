@@ -1,6 +1,8 @@
 import { DataService } from '../data/DataService.interface';
 import { StorageService } from '../storage/Storage.interface';
 
+const STORAGE_FOLDERS = ['zanzibar', 'svaneti', 'gigs'];
+
 export class Main {
     constructor(
         private readonly dataService: DataService,
@@ -14,8 +16,21 @@ export class Main {
         const id = Date.now();
 
         console.time('Getting source config from the data service ' + id);
-        const sources = await this.dataService.getSources();
+        const dataSources = await this.dataService.getSources();
         console.timeLog('Getting source config from the data service ' + id);
+
+        console.time('Getting source config from the storage service ' + id);
+        const storageSources = await this.storageService.getSources();
+        console.timeLog('Getting source config from the storage service ' + id);
+
+        const sources = [
+            ...dataSources.filter(
+                (source) => !STORAGE_FOLDERS.includes(source.folder)
+            ),
+            ...storageSources.filter((source) =>
+                STORAGE_FOLDERS.includes(source.folder)
+            ),
+        ];
 
         console.time('Writing source config to the storage service ' + id);
         await this.storageService.saveSourcesConfig(sources);

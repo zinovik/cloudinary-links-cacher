@@ -2,6 +2,8 @@ import { Bucket, Storage, File } from '@google-cloud/storage';
 import { StorageService } from './Storage.interface';
 import { Source } from '../common/types/Source';
 
+const PUBLIC_URL = 'https://storage.googleapis.com/zinovik-gallery';
+
 interface AlbumInterface {
     path: string;
     title: string;
@@ -30,6 +32,22 @@ export class GoogleStorageService implements StorageService {
     ) {
         const storage = new Storage();
         this.bucket = storage.bucket(this.bucketName);
+    }
+
+    async getSources(): Promise<Source[]> {
+        const [files] = await this.bucket.getFiles();
+
+        return files
+            .map((file) => {
+                const [folder, filename] = file.name.split('/');
+
+                return {
+                    url: `${PUBLIC_URL}/${file.name}`,
+                    folder,
+                    filename,
+                };
+            })
+            .filter((file) => file.filename);
     }
 
     async saveSourcesConfig(sources: Source[]): Promise<void> {
