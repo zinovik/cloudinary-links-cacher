@@ -2,10 +2,14 @@ import { DataService } from '../data/DataService.interface';
 import { StorageService } from '../storage/Storage.interface';
 
 const STORAGE_FOLDERS = [
+    'vietnam',
+    'hoverla',
+    'eurotrip',
     'zanzibar',
     'naliboki',
     'sakartvelo',
     'zalessie',
+    'wild-belarus',
     'gigs',
 ];
 
