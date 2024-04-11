@@ -5,7 +5,7 @@
 ### create bucket, setup cors, check the bucket's cors:
 
 ```bash
-gcloud storage buckets create gs://zinovik-gallery --location=us-central1
+gcloud storage buckets create gs://zinovik-gallery --location=europe-central2
 gcloud storage buckets update gs://zinovik-gallery --cors-file=cors_file.json
 gcloud storage buckets describe gs://zinovik-gallery --format="default(cors_config)"
 gcloud storage buckets update gs://zinovik-gallery --versioning
@@ -41,5 +41,5 @@ gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:
 ### add secrets
 
 ```
-printf "CLOUDINARY_CREDENTIALS" | gcloud secrets create media-urls-updater-cloudinary-credentials --locations=us-central1 --replication-policy="user-managed" --data-file=-
+printf "CLOUDINARY_CREDENTIALS" | gcloud secrets create media-urls-updater-cloudinary-credentials --locations=europe-central2 --replication-policy="user-managed" --data-file=-
 ```
