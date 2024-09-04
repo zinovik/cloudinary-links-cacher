@@ -139,7 +139,7 @@ export class GoogleStorageService implements StorageService {
 
                 return filesFile.save(filesDataBuffer, {
                     gzip: true,
-                    public: true,
+                    public: false,
                     resumable: true,
                     contentType: 'application/json',
                     metadata: {
