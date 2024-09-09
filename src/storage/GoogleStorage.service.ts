@@ -9,6 +9,7 @@ interface AlbumInterface {
     title: string;
     text?: string | string[];
     isSorted?: true;
+    accesses?: string[];
 }
 
 interface FileInterface {
@@ -19,6 +20,7 @@ interface FileInterface {
     description: string;
     text?: string | string[];
     isVertical?: true;
+    accesses?: string[];
 }
 
 export class GoogleStorageService implements StorageService {
@@ -37,17 +39,28 @@ export class GoogleStorageService implements StorageService {
     async getSources(): Promise<Source[]> {
         const [files] = await this.bucket.getFiles();
 
-        return files
-            .map((file) => {
-                const [folder, filename] = file.name.split('/');
+        return await Promise.all(
+            files
+                .filter((file) => file.name.includes('/'))
+                .map(async (file) => {
+                    const [folder, filename] = file.name.split('/');
 
-                return {
-                    url: `${PUBLIC_URL}/${file.name}`,
-                    folder,
-                    filename,
-                };
-            })
-            .filter((file) => file.filename);
+                    const url = `${PUBLIC_URL}/${file.name}`;
+                    //const [url] = await this.bucket
+                    //    .file(file.name)
+                    //    .getSignedUrl({
+                    //        version: 'v4',
+                    //        action: 'read',
+                    //        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
+                    //    });
+
+                    return {
+                        url,
+                        folder,
+                        filename,
+                    };
+                })
+        );
     }
 
     async saveSourcesConfig(sources: Source[]): Promise<void> {
@@ -62,7 +75,7 @@ export class GoogleStorageService implements StorageService {
 
         await file.save(dataBuffer, {
             gzip: true,
-            public: true,
+            public: false,
             resumable: true,
             contentType: 'application/json',
             metadata: {
@@ -154,7 +167,7 @@ export class GoogleStorageService implements StorageService {
 
                 return albumsFile.save(albumsDataBuffer, {
                     gzip: true,
-                    public: true,
+                    public: false,
                     resumable: true,
                     contentType: 'application/json',
                     metadata: {
