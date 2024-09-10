@@ -4,33 +4,12 @@ import { Source } from '../common/types/Source';
 
 const PUBLIC_URL = 'https://storage.googleapis.com/zinovik-gallery';
 
-interface AlbumInterface {
-    path: string;
-    title: string;
-    text?: string | string[];
-    isSorted?: true;
-    accesses?: string[];
-}
-
-interface FileInterface {
-    path: string;
-    filename: string;
-    isTitle?: true;
-    isNoThumbnail?: true;
-    description: string;
-    text?: string | string[];
-    isVertical?: true;
-    accesses?: string[];
-}
-
 export class GoogleStorageService implements StorageService {
     private readonly bucket: Bucket;
 
     constructor(
         private readonly bucketName: string,
-        private readonly sourceConfigFileName: string,
-        private readonly filesFileName: string,
-        private readonly albumsFileName: string
+        private readonly sourceConfigFileName: string
     ) {
         const storage = new Storage();
         this.bucket = storage.bucket(this.bucketName);
