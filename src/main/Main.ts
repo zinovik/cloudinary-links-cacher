@@ -15,9 +15,5 @@ export class Main {
         console.time(`${id} Writing source config to the storage service`);
         await this.storageService.saveSourcesConfig(sources);
         console.timeLog(`${id} Writing source config to the storage service`);
-
-        console.time(`${id} Updating gallery`);
-        await this.storageService.updateGallery(sources);
-        console.timeLog(`${id} Updating gallery`);
     }
 }
