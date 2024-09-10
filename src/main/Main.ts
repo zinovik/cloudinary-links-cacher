@@ -5,19 +5,19 @@ export class Main {
         this.storageService = storageService;
     }
 
-    async process(): Promise<void> {
+    async process(isPublic?: boolean): Promise<void> {
         const id = Date.now();
 
-        console.time('Getting source config from the storage service ' + id);
-        const sources = await this.storageService.getSources();
-        console.timeLog('Getting source config from the storage service ' + id);
+        console.time(`${id} Getting source config from the storage service`);
+        const sources = await this.storageService.getSources(isPublic);
+        console.timeLog(`${id} Getting source config from the storage service`);
 
-        console.time('Writing source config to the storage service ' + id);
+        console.time(`${id} Writing source config to the storage service`);
         await this.storageService.saveSourcesConfig(sources);
-        console.timeLog('Writing source config to the storage service ' + id);
+        console.timeLog(`${id} Writing source config to the storage service`);
 
-        console.time('Updating gallery ' + id);
+        console.time(`${id} Updating gallery`);
         await this.storageService.updateGallery(sources);
-        console.timeLog('Updating gallery ' + id);
+        console.timeLog(`${id} Updating gallery`);
     }
 }

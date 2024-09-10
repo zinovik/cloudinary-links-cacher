@@ -36,7 +36,7 @@ export class GoogleStorageService implements StorageService {
         this.bucket = storage.bucket(this.bucketName);
     }
 
-    async getSources(): Promise<Source[]> {
+    async getSources(isPublic?: boolean): Promise<Source[]> {
         const [files] = await this.bucket.getFiles();
 
         return await Promise.all(
@@ -45,14 +45,15 @@ export class GoogleStorageService implements StorageService {
                 .map(async (file) => {
                     const [folder, filename] = file.name.split('/');
 
-                    const url = `${PUBLIC_URL}/${file.name}`;
-                    //const [url] = await this.bucket
-                    //    .file(file.name)
-                    //    .getSignedUrl({
-                    //        version: 'v4',
-                    //        action: 'read',
-                    //        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
-                    //    });
+                    const url = isPublic
+                        ? `${PUBLIC_URL}/${file.name}`
+                        : (
+                              await this.bucket.file(file.name).getSignedUrl({
+                                  version: 'v4',
+                                  action: 'read',
+                                  expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
+                              })
+                          )[0];
 
                     return {
                         url,

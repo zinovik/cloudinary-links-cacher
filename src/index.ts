@@ -8,12 +8,8 @@ const SOURCE_CONFIG_FILE_NAME = 'sources-config.json';
 const ALBUMS_FILE_NAME = 'albums.json';
 const FILES_FILE_NAME = 'files.json';
 
-functions.http('main', async (_req, res) => {
+functions.http('main', async (req, res) => {
     console.log('Triggered!');
-
-    if (process.env.CLOUDINARY_CREDENTIALS === undefined) {
-        throw new ConfigParameterNotDefinedError('CLOUDINARY_CREDENTIALS');
-    }
 
     const main = new Main(
         new GoogleStorageService(
@@ -24,7 +20,7 @@ functions.http('main', async (_req, res) => {
         )
     );
 
-    await main.process();
+    await main.process(req.query['is-public'] === 'true');
 
     console.log('Done!');
 

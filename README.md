@@ -11,6 +11,12 @@ gcloud storage buckets describe gs://zinovik-gallery --format="default(cors_conf
 gcloud storage buckets update gs://zinovik-gallery --versioning
 ```
 
+### create scheduler
+
+```bash
+gcloud scheduler jobs create http media-urls-updater --location=europe-central2 --schedule="0 0 * * 1" --uri="https://europe-central2-zinovik-project.cloudfunctions.net/media-urls-updater" --oidc-service-account-email=zinovik-project@appspot.gserviceaccount.com --http-method=get
+```
+
 ### create service account
 
 ```bash
@@ -36,10 +42,4 @@ cat key-file.json | base64
 
 ```
 gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:306312319198-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor"
-```
-
-### add secrets
-
-```
-printf "CLOUDINARY_CREDENTIALS" | gcloud secrets create media-urls-updater-cloudinary-credentials --locations=europe-central2 --replication-policy="user-managed" --data-file=-
 ```
