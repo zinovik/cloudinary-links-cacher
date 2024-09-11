@@ -3,7 +3,7 @@ import { StorageService } from './Storage.interface';
 import { Source } from '../common/types/Source';
 
 const PUBLIC_URL = 'https://storage.googleapis.com/zinovik-gallery';
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 200;
 
 export class GoogleStorageService implements StorageService {
     private readonly bucket: Bucket;
