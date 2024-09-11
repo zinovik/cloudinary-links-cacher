@@ -3,7 +3,7 @@ import { StorageService } from './Storage.interface';
 import { Source } from '../common/types/Source';
 
 const PUBLIC_URL = 'https://storage.googleapis.com/zinovik-gallery';
-const BATCH_SIZE = 200;
+const BATCH_SIZE = 400;
 
 export class GoogleStorageService implements StorageService {
     private readonly bucket: Bucket;
@@ -22,6 +22,7 @@ export class GoogleStorageService implements StorageService {
         const sources: Source[] = [];
 
         for (let i = 0; i < files.length; i += BATCH_SIZE) {
+            console.log(i);
             const promises = files
                 .slice(i, i + BATCH_SIZE)
                 .filter((file) => file.name.includes('/'))
