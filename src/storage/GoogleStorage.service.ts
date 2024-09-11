@@ -3,6 +3,7 @@ import { StorageService } from './Storage.interface';
 import { Source } from '../common/types/Source';
 
 const PUBLIC_URL = 'https://storage.googleapis.com/zinovik-gallery';
+const BATCH_SIZE = 50;
 
 export class GoogleStorageService implements StorageService {
     private readonly bucket: Bucket;
@@ -18,8 +19,11 @@ export class GoogleStorageService implements StorageService {
     async getSources(isPublic?: boolean): Promise<Source[]> {
         const [files] = await this.bucket.getFiles();
 
-        return await Promise.all(
-            files
+        const sources: Source[] = [];
+
+        for (let i = 0; i < files.length; i += BATCH_SIZE) {
+            const promises = files
+                .slice(i, i + BATCH_SIZE)
                 .filter((file) => file.name.includes('/'))
                 .map(async (file) => {
                     const [folder, filename] = file.name.split('/');
@@ -39,8 +43,14 @@ export class GoogleStorageService implements StorageService {
                         folder,
                         filename,
                     };
-                })
-        );
+                });
+
+            const sourcesPart = await Promise.all(promises);
+
+            sources.push(...sourcesPart);
+        }
+
+        return sources;
     }
 
     async saveSourcesConfig(sources: Source[]): Promise<void> {
