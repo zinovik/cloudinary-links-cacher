@@ -43,3 +43,9 @@ cat key-file.json | base64
 ```
 gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:306312319198-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor"
 ```
+
+### add access to the token generation
+
+```
+gcloud projects add-iam-policy-binding zinovik-project --member="serviceAccount:306312319198-compute@developer.gserviceaccount.com" --role="roles/iam.serviceAccountTokenCreator"
+```
