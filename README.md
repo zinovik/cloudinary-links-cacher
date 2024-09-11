@@ -14,7 +14,7 @@ gcloud storage buckets update gs://zinovik-gallery --versioning
 ### create scheduler
 
 ```bash
-gcloud scheduler jobs create http media-urls-updater --location=europe-central2 --schedule="0 0 * * 1" --uri="https://europe-central2-zinovik-project.cloudfunctions.net/media-urls-updater" --oidc-service-account-email=zinovik-project@appspot.gserviceaccount.com --http-method=get
+gcloud scheduler jobs create http media-urls-updater --location=europe-central2 --schedule="0 0 * * 1" --uri="https://europe-central2-zinovik-project.cloudfunctions.net/media-urls-updater" --oidc-service-account-email=zinovik-project@appspot.gserviceaccount.com --http-method=get --attempt-deadline=180s
 ```
 
 ### create service account
